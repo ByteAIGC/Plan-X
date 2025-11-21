@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan-X: Instruct Video Generation via Semantic Planning</title>
+    <link rel="stylesheet" href="assets/planx.css">
+</head>
+<body class="min-h-screen bg-background text-foreground">
+    <!-- Navigation Bar -->
+      <nav class="navigation-bar">
+        <div class="navigation-content">
+          <!-- <div class="navigation-title">
+            <strong>Lynx:</strong> Towards High-Fidelity Personalized Video Generation
+          </div> -->
+          <div class="navigation-buttons">
+            <button
+              class="bg-transparent text-white hover:bg-white hover:text-black transition-colors px-4 py-2 h-auto border border-white/20 flex items-center rounded-md"
+              onclick="window.open('', '_blank')"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2 text-white"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><line x1="10" y1="9" x2="8" y2="9"></line></svg>
+              arXiv (Coming Soon)
+            </button>
+            
+            <!-- <button
+              class="bg-transparent text-white hover:bg-white hover:text-black transition-colors px-4 py-2 h-auto border border-white/20 flex items-center rounded-md"
+              onclick="window.open('', '_blank')"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 mr-2 text-white"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+              Code and Model (Coming Soon)
+            </button> -->
+          </div>
+        </div>
+      </nav>
+
+    <!-- Teaser Description Section -->
+    <section class="teaser-description-section">
+        <div class="teaser-description-content">
+            <h1 class="teaser-main-title">
+                <strong>Plan-X</strong>
+            </h1>
+            <h2 class="teaser-subtitle">
+                Instruct Video Generation via Semantic Planning
+            </h2>
+            
+            <div class="teaser-authors">
+                <a href="https://scholar.google.com/citations?user=_8RT5mgAAAAJ&hl=en" target="_blank">Lun Huang</a><sup>1,2*</sup>, 
+                <a href="https://youxie.github.io/" target="_blank">You Xie</a><sup>3</sup>, 
+                <a href="https://hongyixu37.github.io/homepage/" target="_blank">Hongyi Xu</a><sup>3</sup>,
+                <a href="https://gutianpei.github.io/" target="_blank">Tianpei Gu</a><sup>3</sup>,
+                <a href="https://zhangchenxu528.github.io/" target="_blank">Chenxu Zhang</a><sup>3</sup>,
+                <a href="https://guoxiansong.github.io/homepage/index.html" target="_blank">Guoxian Song</a><sup>3</sup>,
+                <a href="https://lizenan.github.io/" target="_blank">Zenan Li</a><sup>3</sup>,
+                <a href="https://xiaochen-zhao.netlify.app/" target="_blank">Xiaochen Zhao</a><sup>3</sup>,
+                <a href="https://scholar.google.com/citations?user=fqubyX0AAAAJ&hl=en" target="_blank">Linjie Luo</a><sup>3</sup>,
+                <a href="https://ece.princeton.edu/people/gsapiro" target="_blank">Guillermo Sapiro</a><sup>2,4</sup>
+            </div>
+            <div class="teaser-affiliations">
+                <sup>1</sup>Duke University, <sup>2</sup>Princeton University, <sup>3</sup>ByteDance Intelligent Creation, <sup>4</sup>Apple<br>
+                *Work done during an internship at ByteDance.
+            </div>
+
+            <p class="teaser-description">
+                Plan-X unifies LLM-based in-context reasoning with diffusion video generation, tackling the core challenge of high-level semantic planning for complex, multi-action, hallucination-free videos.
+            </p>
+        </div>
+    </section>
+
+
+        <section class="max-w-[1200px] mx-auto px-4 md:px-[10%] mb-[100px]">
+
+        <!-- 4x4 video + prompt grid -->
+        <div class="basemodel-grid">
+            <!-- Row 1 -->
+            <div class="basemodel-grid-row">
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/teaser/1.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">The dog lowers its head towards the mushroom, gently grips the mushroom stem with its mouth, carefully pulls the mushroom from the log, then swallows it.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/teaser/2.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">The boy extends his left hand towards the green cube, picks it up from the mat, and carefully places the green cube on top of the red fire truck, where it balances precariously.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/teaser/3.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">The woman picks up the silver watering can, tips the can, pouring water into the geranium pot, then places the watering can back on the table.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/teaser/4.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">Woman slowly raises her head, looks up towards the bronze owl statue, reaches her right hand to the shelf, picks up the owl statue, and places it carefully on the open book.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Overview Image -->
+    <section class="max-w-[1200px] mx-auto px-4 md:px-[10%] mb-[100px]">
+        <h3 class="text-xl font-semibold py-5 mb-2 text-justify">
+            Method Overview
+        </h3>
+        <div class="mt-4">
+            <div class="flex justify-start">
+                <img
+                    src="assets/overview.png"
+                    alt="Overview of Plan-X"
+                    class="max-w-full h-auto rounded-lg"
+                />
+            </div>
+            <p class="section-description text-justify" style="margin-top: 1rem;">
+                <strong>Overview of Plan-X.</strong> Plan-X comprises two key components: an MLLM for high-level semantic reasoning and planning, and a DiT for high-fidelity video synthesis. The Semantic Planner receives multimodal inputs, including a descriptive text prompt for static scene content (<i>T<sub>img</sub></i>), a motion description (<i>T<sub>motion</sub></i>), an instructional system prompt (<i>T<sub>sys</sub></i>) specifying the number of target frames <i>T</i>, and optionally the semantically encoded first frame <i>I<sub>0</sub></i>.
+                It then autoregressively generates discrete text-aligned semantic tokens that encode spatio-temporal semantic structures in the form of keyframes.
+                Complementary to global text conditioning, we introduce a dedicated semantic guidance branch that instructs a pretrained DiT model to translate these structured semantics augmented with 3D spatio-temporal RoPE into high-fidelity, temporally coherent video realizations.
+            </p>
+        </div>
+    </section>
+
+    <!-- Base Model Comparison (Seedance) -->
+    <section class="max-w-[1200px] mx-auto px-4 md:px-[10%] mb-[100px]">
+        <h3 class="text-xl font-semibold py-5 mb-3 text-justify">
+            Base DiT vs Plan-X Comparison
+        </h3>
+
+        <!-- Column headers -->
+        <div class="basemodel-header-row">
+            <div class="basemodel-header">Seedance 1.0 (Base)</div>
+            <div class="basemodel-header">Plan-X-Seedance (Ours)</div>
+            <div class="basemodel-header">Seedance 1.0 (Base)</div>
+            <div class="basemodel-header">Plan-X-Seedance (Ours)</div>
+        </div>
+
+        <!-- 4x4 video + prompt grid -->
+        <div class="basemodel-grid">
+            <!-- Row 1 -->
+            <div class="basemodel-grid-row">
+                <div class="prompt-wrap">
+                    <div class="video-container-square">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/seedance/1.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">Fixed camera. The woman slowly stands up from the ground, using both hands on the floor to push herself up. She instinctively glances around her, then raises her arms and stretches upward, her body leaning slightly backward.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container-square">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/planx-seedance/1.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">Fixed camera. The woman slowly stands up from the ground, using both hands on the floor to push herself up. She instinctively glances around her, then raises her arms and stretches upward, her body leaning slightly backward.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container-square">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/seedance/2.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">Fixed camera. A hand reaches out to the passport on the table and places it on the record.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container-square">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/planx-seedance/2.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">Fixed camera. A hand reaches out to the passport on the table and places it on the record.</div>
+                </div>
+            </div>
+
+            <!-- Row 2 -->
+            <div class="basemodel-grid-row">
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/seedance/4.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">The woman's right hand retracts from the purple 'Cosmic Bites' bag. Her hand moves downwards and to the left. She grasps an orange 'Cosmic Bites' bag from the shelf below, holding it out slightly.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/planx-seedance/4.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">The woman's right hand retracts from the purple 'Cosmic Bites' bag. Her hand moves downwards and to the left. She grasps an orange 'Cosmic Bites' bag from the shelf below, holding it out slightly.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/seedance/5.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">The person's right gloved hand picks up the stirring rod, carefully places it vertically inside the beaker, letting it rest against the side, then withdraws the hand.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/planx-seedance/5.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">The person's right gloved hand picks up the stirring rod, carefully places it vertically inside the beaker, letting it rest against the side, then withdraws the hand.</div>
+                </div>
+            </div>
+
+            <!-- Row 3 -->
+            <div class="basemodel-grid-row">
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/seedance/6.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">The man's right hand extends, fingers gently grip the brass stem of the green-shaded desk lamp, and slowly pivots the lamp head downwards, causing the green shade to angle lower towards the book, intensifying the light on the table surface.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/planx-seedance/6.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">The man's right hand extends, fingers gently grip the brass stem of the green-shaded desk lamp, and slowly pivots the lamp head downwards, causing the green shade to angle lower towards the book, intensifying the light on the table surface.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/seedance/7.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">The man's hand reaches for the smartphone, lifts it slightly, and his thumb briefly taps the screen, causing it to illuminate and display content.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/planx-seedance/7.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">The man's hand reaches for the smartphone, lifts it slightly, and his thumb briefly taps the screen, causing it to illuminate and display content.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Column headers -->
+        <div class="basemodel-header-row">
+            <div class="basemodel-header">Wan 2.2 (Base)</div>
+            <div class="basemodel-header">Plan-X-Wan (Ours)</div>
+            <div class="basemodel-header">Wan 2.2 (Base)</div>
+            <div class="basemodel-header">Plan-X-Wan (Ours)</div>
+        </div>
+
+        <!-- 4x4 video + prompt grid -->
+        <div class="basemodel-grid">
+            <!-- Row 1 -->
+            <div class="basemodel-grid-row">
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/wan/1.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">fixed shot, close-up of a purple lotus flower blooming slowly. the petals gradually open outward, revealing the inner structure and stamen. wisps of smoke drift around the flower, enhancing its ethereal appearance.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/planx-wan/1.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">fixed shot, close-up of a purple lotus flower blooming slowly. the petals gradually open outward, revealing the inner structure and stamen. wisps of smoke drift around the flower, enhancing its ethereal appearance.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/wan/2.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">Fixed shot. A hand reaches to the plate with cucumbers, move and place it next to the transparent plate.</div>
+                </div>
+
+                <div class="prompt-wrap">
+                    <div class="video-container">
+                        <video muted loop autoPlay playsInline>
+                            <source src="assets/basemodel/planx-wan/2.mp4" type="video/mp4" />
+                        </video>
+                    </div>
+                    <div class="prompt">Fixed shot. A hand reaches to the plate with cucumbers, move and place it next to the transparent plate.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Baseline Comparison -->
+    <section class="max-w-[1920px] mx-auto px-4 md:px-[10%] mb-[100px]">
+        <h3 class="text-xl font-semibold py-5 mb-5 text-justify">
+            Baseline Comparison
+        </h3>
+        <p class="section-description text-justify">
+            Comparison with baseline methods
+        </p>
+        <div class="baseline-grid">
+            <!-- Reference image with caption -->
+            <div class="baseline-cell baseline-cell-reference">
+                <div class="video-container">
+                    <img
+                        src="assets/baseline_first_frame.png"
+                        alt="Baseline reference frame"
+                        class="w-full h-full object-cover"
+                    />
+                </div>
+                <p class="baseline-label">
+                    Fixed shot on a tabletop. The left hand reaches in to pick up the pink powder comb from the green book and sets it down on the table, while the right hand moves in and lifts the white iPhone from its spot, placing it to rest on top of the green book.
+                </p>
+            </div>
+
+            <!-- Baseline method videos -->
+            <div class="baseline-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/baseline/hunyuan.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="baseline-label">HunyuanVideo</p>
+            </div>
+
+            <div class="baseline-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/baseline/skyreels.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="baseline-label">SkyReels V2 14B</p>
+            </div>
+
+            <div class="baseline-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/baseline/wan.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="baseline-label">Wan 2.2 5B</p>
+            </div>
+
+            <div class="baseline-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/baseline/seedance.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="baseline-label">Seedance 1.0</p>
+            </div>
+
+            <div class="baseline-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/baseline/planx-wan.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="baseline-label">Plan-X-Wan</p>
+            </div>
+
+            <div class="baseline-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/baseline/planx-seedance.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="baseline-label">Plan-X-Seedance</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="max-w-[1920px] mx-auto px-4 md:px-[10%] mb-[100px]">
+        <div class="baseline-grid">
+            <!-- Reference image with caption -->
+            <div class="baseline-cell baseline-cell-reference">
+                <div class="video-container">
+                    <img
+                        src="assets/baseline_first_frame-1.png"
+                        alt="Baseline reference frame"
+                        class="w-full h-full object-cover"
+                    />
+                </div>
+                <p class="baseline-label">
+                    The camera captures a fixed overhead view of a cluttered table covered with a yellow and white checkered cloth. A hand reaches into the white container, retrieves the red makeup remover, and places it beside the red lipstick on the table.
+                </p>
+            </div>
+
+            <!-- Baseline method videos -->
+            <div class="baseline-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/baseline/additional/hunyuan.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="baseline-label">HunyuanVideo</p>
+            </div>
+
+            <div class="baseline-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/baseline/additional/skyreels.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="baseline-label">SkyReels V2 14B</p>
+            </div>
+
+            <div class="baseline-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/baseline/additional/wan.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="baseline-label">Wan 2.2 5B</p>
+            </div>
+
+            <div class="baseline-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/baseline/additional/seedance.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="baseline-label">Seedance 1.0</p>
+            </div>
+
+            <div class="baseline-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/baseline/additional/planx-wan.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="baseline-label">Plan-X-Wan</p>
+            </div>
+
+            <div class="baseline-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/baseline/additional/planx-seedance.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="baseline-label">Plan-X-Seedance</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ablation Study -->
+    <section class="max-w-[1920px] mx-auto px-4 md:px-[10%] mb-[100px]">
+        <h3 class="text-xl font-semibold py-5 mb-5 text-justify">
+            Abalation Study
+        </h3>
+        <div class="ablation-grid">
+            <!-- Reference image with caption -->
+            <div class="ablation-cell ablation-cell-reference">
+                <div class="video-container">
+                    <img
+                        src="assets/ablation_first_frame-0.png"
+                        alt="ablation reference frame"
+                        class="w-full h-full object-cover"
+                    />
+                </div>
+                <p class="ablation-label">
+                    The camera focuses on a hand holding a small pot with two cacti, then slowly shifts focus to the woman holding it. She smiles at the camera while standing in a busy outdoor area with blurred lights and people in the background.
+                </p>
+            </div>
+
+            <!-- ablation method videos -->
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_2.2_5B-0.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Wan 2.2 5B</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_pe-0.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Wan + PE</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_sft-0.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Wan + SFT</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_query-0.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Wan + Query</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_1_5B_AR-0.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Plan-X-Wan (1.5B M)</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_wo_rope-0.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Plan-X-Wan w/o 3D RoPE</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_wo_text-0.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Plan-X-Wan w/o Text</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_wo_e2e-0.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Plan-X-Wan w/o e2e</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/planx-wan-0.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Plan-X-Wan</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="max-w-[1920px] mx-auto px-4 md:px-[10%] mb-[100px]">
+        <div class="ablation-grid">
+            <!-- Reference image with caption -->
+            <div class="ablation-cell ablation-cell-reference">
+                <div class="video-container">
+                    <img
+                        src="assets/ablation_first_frame-1.png"
+                        alt="ablation reference frame"
+                        class="w-full h-full object-cover"
+                    />
+                </div>
+                <p class="ablation-label">
+                    A hand reaches in and picks up a pair of black chopsticks from a white medium seasoning dish. The chopsticks are then placed on the countertop next to a white small seasoning dish.
+                </p>
+            </div>
+
+            <!-- ablation method videos -->
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_2.2_5B-1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Wan 2.2 5B</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_pe-1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Wan + PE</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_sft-1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Wan + SFT</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_query-1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Wan + Query</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_1_5B_AR-1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Plan-X-Wan (1.5B M)</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_wo_rope-1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Plan-X-Wan w/o 3D RoPE</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_wo_text-1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Plan-X-Wan w/o Text</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/wan_wo_e2e-1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Plan-X-Wan w/o e2e</p>
+            </div>
+
+            <div class="ablation-cell">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/ablation/planx-wan-1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <p class="ablation-label">Plan-X-Wan</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Single Image - Multiple Prompts -->
+    <section class="max-w-[1920px] mx-auto px-4 md:px-[10%] mb-[100px]">
+        <h3 class="text-xl font-semibold py-5 mb-5 text-justify
+        ">
+            Single Image - Multiple Actions
+        </h3>
+        <div class="video-grid video-grid-4">
+            <!-- Example 1 -->
+            <div class="prompt-wrap">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/multi_prompts/1-1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="prompt">The man's right hand smoothly grasps the white coffee cup, lifts it to his lips for a brief sip, and then gently returns the cup to its saucer on the table.</div>
+            </div>
+            <div class="prompt-wrap">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/multi_prompts/1-2.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="prompt">The man's right hand gently pushes the white coffee cup and its saucer a few inches to the left across the polished wooden tabletop.</div>
+            </div>
+
+            <!-- Example 2 -->
+            <div class="prompt-wrap">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/multi_prompts/2-1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="prompt">camera tilts down, the person's hands move to the base of the vase, lifting it slightly off the wheel, the vase tilts precariously, then settles back down.</div>
+            </div>
+            <div class="prompt-wrap">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/multi_prompts/2-2.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="prompt">camera slowly pans left, the person's head turns to look at a finished pot on a shelf, their hand pauses on the vase, then returns to shaping.</div>
+            </div>
+
+            <!-- Example 3 -->
+            <div class="prompt-wrap">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/multi_prompts/4-1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="prompt">The child kneels slightly, uses both hands to gently grasp the potted plant, and then carefully lifts it from the soil, moving it to the right and placing it onto the grassy path next to the watering can.</div>
+            </div>
+            <div class="prompt-wrap">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/multi_prompts/4-2.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="prompt">The child's right hand lowers the silver shovel, placing it flat on the soil near their boot. The child then bends slightly, reaching to grasp the handle of the green watering can, lifting it off the grass.</div>
+            </div>
+
+            <!-- Example 4 -->
+            <div class="prompt-wrap">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/multi_prompts/5-1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="prompt">Fixed shot. The vivid blue bird flutters its wings, takes off from the bird bath rim, and flies upward and out of frame.</div>
+            </div>
+            <div class="prompt-wrap">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/multi_prompts/5-2.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="prompt">Fixed shot. The vivid blue bird flies from the bird bath to the red apple, landing briefly on its top, causing the apple to tilt and then roll slightly to the side before the bird flies off screen.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="max-w-[1920px] mx-auto px-4 md:px-[10%] mb-[100px]">
+        <h3 class="text-xl font-semibold py-5 mb-5 text-justify">
+            Text-To-Video (T2V) Generation
+        </h3>
+        <div class="video-grid video-grid-2">
+            <div class="prompt-wrap">
+                <div class="video-container-square">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/t2v/1.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="prompt">Image description: "Medium close-up shot of a middle-aged white woman standing outdoors in the snow, holding a plate of pancakes with both hands and smiling at the camera. She is wearing a light-colored headscarf with a floral pattern and a dark green coat. Her face has visible wrinkles, deep-set eyes, a wide nose, distinct nasolabial folds, straight teeth, reddish skin, and a short, round chin. She has brown hair and looks towards the lens. The plate in front of her holds many pancakes stacked together. The background is blurred, featuring snow-covered trees and some red berries." Video prompt: "On a snowy day, a woman holds a plate of pancakes. The woman first squints her eyes while looking at the camera and speaking happily, then she laughs loudly while shaking her body up and down, followed by speaking happily again."</div>
+            </div>
+            <div class="prompt-wrap">
+                <div class="video-container-square">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/t2v/2.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="prompt">Image description: "In a backyard with gentle sunshine, a father wearing a green T-shirt is bending over watering a newly planted small tree with a hose. Standing beside him is a little girl wearing a yellow dress and a denim jacket, quietly watching her father's actions. Behind them are a wooden fence and a gray house wall; the ground is covered with newly turned wet soil, sunlight spills down through tree shadows, and the scene is warm and tranquil." Video prompt: "Fixed shot, the father uses a hose to water the roots of the tree. The little girl smiles and watches, reaching out to touch the tree leaves. Very excited, the little girl then raises both hands and cheers."</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="max-w-[1920px] mx-auto px-4 md:px-[10%] mb-[100px]">
+        <h3 class="text-xl font-semibold py-5 mb-5 text-justify">
+            Additional Applications: Semantic Cross Transfer
+        </h3>
+        <!-- Column headers -->
+        <div class="application-header-row">
+            <div class="application-header">Generated A</div>
+            <div class="application-header">Generated B</div>
+        </div>
+        <div class="video-grid video-grid-2">
+            <div class="prompt-wrap">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/applications/semantic_transfer/source.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="prompt">The left figure speaks to the right, taps their hands with a raised right hand, then gently touches the right figure’s hand with both hands.</div>
+            </div>
+            <div class="prompt-wrap">
+                <div class="video-container">
+                    <video muted loop autoPlay playsInline>
+                        <source src="assets/applications/semantic_transfer/generated.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="prompt">The left figure speaks to the right, taps their hands with a raised right hand, then gently touches the right figure’s hand with both hands.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="max-w-[1920px] mx-auto px-4 md:px-[10%] mb-[100px]">
+        <h3 class="text-xl font-semibold py-5 mb-5 text-justify">
+            Additional Applications: Video Continuation
+        </h3>
+        <div class="application-header-row">
+            <div class="application-header">Source</div>
+            <div class="application-header">Generated</div>
+        </div>
+        <div class="video-grid video-grid-2">
+            <div class="video-container">
+                <video muted loop autoPlay playsInline>
+                    <source src="assets/applications/vid_continuation/source.mp4" type="video/mp4" />
+                </video>
+            </div>
+            <div class="prompt-wrap">
+                <div class="video-container">
+                <video muted loop autoPlay playsInline>
+                        <source src="assets/applications/vid_continuation/generated.mp4" type="video/mp4" />
+                    </video>
+                </div>
+                <div class="prompt">The young man starts moving his hands and body rhythmically as if dancing to music.</div>
+            </div>
+        </div>
+    </section>
+
+</body>
+</html>
