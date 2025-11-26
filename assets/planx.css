@@ -4757,11 +4757,13 @@ html {
 @media (hover: hover) {
   .prompt-wrap:hover .prompt, .prompt-wrap:hover .prompt-large {
     opacity: 1;
-    pointer-events: all;
+    pointer-events: none;
+    bottom: auto;
+    top: 10px;
   }
 
   .prompt-wrap:hover .video-tag, .prompt-wrap:hover .video-tag-large {
-    opacity: .7;
+    opacity: 0;
   }
 }
 
